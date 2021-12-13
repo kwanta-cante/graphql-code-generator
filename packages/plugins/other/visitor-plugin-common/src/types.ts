@@ -1,6 +1,18 @@
 import { ASTNode, FragmentDefinitionNode } from 'graphql';
+import { Maybe } from 'graphql/jsutils/Maybe';
 import { ParsedMapper } from './mappers';
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 
+/**
+ * Fields to be expected in the response without being explicitly requested
+ */
+export interface PrependResponseField {
+  type: string;
+  name: string;
+  optional: boolean;
+}
 /**
  * A map between the GraphQL directive name and the identifier that should be used
  */

@@ -7,6 +7,8 @@ import {
   LoadedFragment,
   NormalizedScalarsMap,
   DeclarationKind,
+  PrependResponseField,
+  MakeOptional,
 } from './types';
 import { DeclarationBlockConfig } from './utils';
 import autoBind from 'auto-bind';
@@ -35,6 +37,7 @@ export interface ParsedConfig {
   dedupeFragments: boolean;
   allowEnumStringTypes: boolean;
   inlineFragmentTypes: InlineFragmentTypeOptions;
+  prependResponseFields: PrependResponseField[];
 }
 
 export interface RawConfig {
@@ -212,6 +215,26 @@ export interface RawConfig {
    * @default inline
    */
   inlineFragmentTypes?: InlineFragmentTypeOptions;
+  /**
+   * @default: [] (none as empty array)
+   * @description Prepend fields in the response in addition to the fields from schema
+   * This can be used to e.g. calculate a __path element which would contain the parent properties of the query result
+   * leading up to the object (`{__path: [] , a: { __path:["a"], b: { __path:["a", "b"], c: null}}}`)
+   *
+   * To use this the processor needs an implementation of {@link BaseSelectionSetProcessor.transformPrependFields}
+   * The default implementation will error out if this fiels is set non-empty.
+   * @example:
+   * ```yml
+   * plugins
+   *   config:
+   *     prependResponseFields:
+   *      - name: __path
+   *      - type: string[]
+   * ```
+   *
+   *
+   */
+  prependResponseFields?: MakeOptional<PrependResponseField, 'optional'>[];
 }
 
 export class BaseVisitor<TRawConfig extends RawConfig = RawConfig, TPluginConfig extends ParsedConfig = ParsedConfig> {
@@ -232,6 +255,12 @@ export class BaseVisitor<TRawConfig extends RawConfig = RawConfig, TPluginConfig
       dedupeFragments: !!rawConfig.dedupeFragments,
       allowEnumStringTypes: !!rawConfig.allowEnumStringTypes,
       inlineFragmentTypes: rawConfig.inlineFragmentTypes ?? 'inline',
+      prependResponseFields:
+        rawConfig.prependResponseFields?.map(
+          // forces the optional field into boolean
+          // undefined is false
+          field => ({ ...field, optional: !!field.optional })
+        ) || [],
       ...((additionalConfig || {}) as any),
     };
 

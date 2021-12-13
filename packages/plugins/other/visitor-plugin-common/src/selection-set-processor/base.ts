@@ -61,4 +61,18 @@ export class BaseSelectionSetProcessor<Config extends SelectionSetProcessorConfi
       `Please override "transformTypenameField" as part of your BaseSelectionSetProcessor implementation!`
     );
   }
+  transformPrependFields(fields: { _type: string; _name: string }[] = []): ProcessResult {
+    if (fields === []) {
+      return [];
+    }
+    //const ret: ProcessResult = fields.map( ({_type: type,_name: name})=>({type, name}));
+    throw new Error(
+      `Please override "transformPrependField" as part of your BaseSelectionSetProcessor implementation!
+      One possible implementation is as simple as:
+      transformPrependFields( fields: {_type: string, _name: string}[]=[] ): ProcessResult{
+        return fields.map( ({_type: type,_name: name})=>({type, name}));
+      }
+      `
+    );
+  }
 }

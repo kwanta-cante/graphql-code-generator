@@ -501,6 +501,7 @@ export class BaseTypesVisitor<
             ),
           ]
         : []),
+      ...this.getPrependResponseFields(type),
       ...node.fields,
     ] as string[];
     const interfacesNames = originalNode.interfaces ? originalNode.interfaces.map(i => this.convertName(i)) : [];
@@ -525,7 +526,15 @@ export class BaseTypesVisitor<
 
     return declarationBlock;
   }
-
+  getPrependResponseFields(type: DeclarationKind): string[] {
+    return this.config.prependResponseFields.map(prependResponseField =>
+      indent(
+        `${this.config.immutableTypes ? 'readonly ' : ''}${prependResponseField.name}${
+          prependResponseField.optional ? '?' : ''
+        }: ${prependResponseField.type}${this.getPunctuation(type)}`
+      )
+    );
+  }
   getFieldComment(node: FieldDefinitionNode): string {
     let commentText: string = node.description as any;
     const deprecationDirective = node.directives.find((v: any) => v.name === 'deprecated');
