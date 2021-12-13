@@ -1,4 +1,4 @@
-﻿export type JsonAttributesSource = 'Newtonsoft.Json' | 'System.Text.Json';
+export type JsonAttributesSource = 'Newtonsoft.Json' | 'System.Text.Json';
 
 function unsupportedSource(attributesSource: JsonAttributesSource): void {
   throw new Error(`Unsupported JSON attributes source: ${attributesSource}`);
